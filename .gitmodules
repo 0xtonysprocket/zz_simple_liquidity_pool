@@ -1,0 +1,3 @@
+[submodule "mammoth_pool"]
+	path = mammoth_pool
+	url = https://github.com/0xtonysprocket/mammoth_pool.git
