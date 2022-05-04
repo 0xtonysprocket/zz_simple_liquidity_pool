@@ -1,19 +1,23 @@
 %lang starknet
 
+# alias EVEN and ODD
+const BLACKOUT = 0
+const NONBLACKOUT = 1
+
 # Starknet WBTC address
-WBTC_ADDRESS = 1
+const WBTC_ADDRESS = 1
 
 # Starknet ETH address
-ETH_ADDRESS = 2
+const ETH_ADDRESS = 2
 
 # Starknet USDC address
-USDC_ADDRESS = 3
+const USDC_ADDRESS = 3
 
 # Starknet Zigzag Token address
-ZZ_TOKEN_ADDRESS = 4
+const ZZ_TOKEN_ADDRESS = 4
 
 # Zigzag Exchange Contract address
-ZZ_EXCHANGE_ADDRESS = 5
+const ZZ_EXCHANGE_ADDRESS = 5
 
-# Number of seconds between reward accrual
-REWARD_INTERVAL = 3600
+# Time in seconds that contract alternates between blackout window and allowing withdrawals
+const TIME_DELTA = 1209600
