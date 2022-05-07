@@ -96,7 +96,9 @@ func claim_reward{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     let (local zz_token_contract : felt) = zz_token_address.read()
     let (local reward : Uint256) = calculate_reward(user_address)
 
-    Mintable_ERC.mint(contract_address=zz_token_contract, to=user_address, amount=reward)
+    with_attr error_message("FAILED TO MINT LP TOKEN"):
+        Mintable_ERC.mint(contract_address=zz_token_contract, to=user_address, amount=reward)
+    end
 
     let (local update_success : felt) = update_weighted_average_timestamp(user_address, 0)
 

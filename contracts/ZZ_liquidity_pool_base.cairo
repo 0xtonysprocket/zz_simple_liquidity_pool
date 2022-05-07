@@ -27,11 +27,6 @@ end
 func current_rewards_contract() -> (address : felt):
 end
 
-# whitelisted mm_accounts
-@storage
-func mm_account_whitelist(mm_address : felt) -> (bool : felt):
-end
-
 # is a user an active pool depositer
 @storage
 func is_user_active(user_address : felt) -> (bool : felt):
@@ -50,6 +45,23 @@ end
 # inactive stake of the user
 @storage
 func user_inactive_stake(user_address : felt) -> (inactive_amount : Uint256):
+end
+
+# TODO: add in monitoring of the total stakes
+
+# total stake
+@storage
+func total_stake() -> (total : Uint256):
+end
+
+# total active stake
+@storage
+func total_active_stake() -> (total_active : Uint256):
+end
+
+# total inactive stake
+@storage
+func total_inactive_stake() -> (total_inactive : Uint256):
 end
 
 namespace Liquidity_Pool:
@@ -80,6 +92,16 @@ namespace Liquidity_Pool:
 
         user_active_stake.write(user_address, new_active_stake)
         user_total_staked.write(user_address, new_total_stake)
+
+        # update total stakes
+        let (local current_total_active_stake : Uint256) = total_active_stake.read()
+        let (local current_overall_total_stake : Uint256) = total_stake.read()
+
+        local new_overall_active_stake : Uint256 = uint256_checked_add(current_total_active_stake, amount_to_deposit)
+        local new_overall_total_stake : Uint256 = uint256_checked_add(current_overall_total_stake, amount_to_deposit)
+
+        total_active_stake.write(new_overall_active_stake)
+        total_stake.write(new_overall_total_stake)
 
         return (TRUE)
     end
@@ -130,11 +152,21 @@ namespace Liquidity_Pool:
         let (local current_total_stake) = user_total_staked.read(user_address)
 
         # calculate new stakes
-        local new_active_stake : Uint256 = uint256_checked_sub_le(current_active_stake, amount_to_withdraw)
+        local new_inactive_stake : Uint256 = uint256_checked_sub_le(current_inactive_stake, amount_to_withdraw)
         local new_total_stake : Uint256 = uint256_checked_sub_le(current_total_stake, amount_to_withdraw)
 
-        user_active_stake.write(user_address, new_active_stake)
+        user_inactive_stake.write(user_address, new_inactive_stake)
         user_total_staked.write(user_address, new_total_stake)
+
+        # update total stake
+        let (local current_total_inactive_stake : Uint256) = total_inactive_stake.read()
+        let (local current_overall_total_stake : Uint256) = total_stake.read()
+
+        local new_overall_inactive_stake : Uint256 = uint256_checked_sub_le(current_total_inactive_stake, amount_to_withdraw)
+        local new_overall_total_stake : Uint256 = uint256_checked_sub_le(current_overall_total_stake, amount_to_withdraw)
+
+        total_inactive_stake.write(new_overall_inactive_stake)
+        total_stake.write(new_overall_total_stake)
 
         return (TRUE)
     end
@@ -154,6 +186,16 @@ namespace Liquidity_Pool:
         user_active_stake.write(user_address, new_active_stake)
         user_inactive_stake.write(user_address, new_inactive_stake)
 
+        # update total stake
+        let (local current_total_inactive_stake : Uint256) = total_inactive_stake.read()
+        let (local current_overall_active_stake : Uint256) = total_active_stake.read()
+
+        local new_overall_inactive_stake : Uint256 = uint256_checked_add(current_total_inactive_stake, amount_to_deactivate)
+        local new_overall_active_stake : Uint256 = uint256_checked_sub_le(current_overall_total_stake, amount_to_deactivate)
+
+        total_inactive_stake.write(new_overall_inactive_stake)
+        total_active_stake.write(new_overall_active_stake)
+
         return (TRUE)
     end
 
@@ -171,6 +213,16 @@ namespace Liquidity_Pool:
 
         user_active_stake.write(user_address, new_active_stake)
         user_inactive_stake.write(user_address, new_inactive_stake)
+
+        # update total stake
+        let (local current_total_inactive_stake : Uint256) = total_inactive_stake.read()
+        let (local current_overall_active_stake : Uint256) = total_active_stake.read()
+
+        local new_overall_inactive_stake : Uint256 = uint256_checked_sub_le(current_total_inactive_stake, amount_to_reactivate)
+        local new_overall_active_stake : Uint256 = uint256_checked_add(current_overall_total_stake, amount_to_reactivate)
+
+        total_inactive_stake.write(new_overall_inactive_stake)
+        total_active_stake.write(new_overall_active_stake)
 
         return (TRUE)
     end
